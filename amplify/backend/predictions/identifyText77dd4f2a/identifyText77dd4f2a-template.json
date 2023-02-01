@@ -1,0 +1,202 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"8.3.1\",\"stackType\":\"predictions-RekognitionAndTextract\",\"metadata\":{}}",
+  "Parameters": {
+    "resourceName": {
+      "Type": "String"
+    },
+    "identifyPolicyName": {
+      "Type": "String"
+    },
+    "access": {
+      "Type": "String"
+    },
+    "authRoleName": {
+      "Type": "String"
+    },
+    "unauthRoleName": {
+      "Type": "String"
+    },
+    "adminAuthProtected": {
+      "Type": "String"
+    },
+    "adminGuestProtected": {
+      "Type": "String"
+    },
+    "identifyType": {
+      "Type": "String"
+    },
+    "identifyDoc": {
+      "Type": "String"
+    },
+    "format": {
+      "Type": "String"
+    },
+    "env": {
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "CreateAdminAuthProtected": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "adminAuthProtected"
+            },
+            "DISALLOW"
+          ]
+        }
+      ]
+    },
+    "CreateAdminGuestProtected": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "adminGuestProtected"
+            },
+            "DISALLOW"
+          ]
+        }
+      ]
+    },
+    "ShouldNotCreateEnvResources": {
+      "Fn::Equals": [
+        {
+          "Ref": "env"
+        },
+        "NONE"
+      ]
+    },
+    "AuthGuestRoleAccess": {
+      "Fn::Equals": [
+        {
+          "Ref": "access"
+        },
+        "authAndGuest"
+      ]
+    }
+  },
+  "Outputs": {
+    "region": {
+      "Value": {
+        "Fn::FindInMap": [
+          "RegionMapping",
+          {
+            "Ref": "AWS::Region"
+          },
+          {
+            "Ref": "identifyType"
+          }
+        ]
+      }
+    },
+    "format": {
+      "Value": {
+        "Ref": "format"
+      }
+    }
+  },
+  "Resources": {
+    "IdentifyTextPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": {
+          "Ref": "identifyPolicyName"
+        },
+        "Roles": {
+          "Fn::If": [
+            "AuthGuestRoleAccess",
+            [
+              {
+                "Ref": "authRoleName"
+              },
+              {
+                "Ref": "unauthRoleName"
+              }
+            ],
+            [
+              {
+                "Ref": "authRoleName"
+              }
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "rekognition:DetectText",
+                "rekognition:DetectLabel",
+                "textract:AnalyzeDocument",
+                "textract:DetectDocumentText",
+                "textract:GetDocumentAnalysis",
+                "textract:StartDocumentAnalysis",
+                "textract:StartDocumentTextDetection"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Mappings": {
+    "RegionMapping": {
+      "us-east-1": {
+        "identifyText": "us-east-1"
+      },
+      "us-east-2": {
+        "identifyText": "us-east-2"
+      },
+      "us-west-1": {
+        "identifyText": "us-west-1"
+      },
+      "us-west-2": {
+        "identifyText": "us-west-2"
+      },
+      "ca-central-1": {
+        "identifyText": "ca-central-1"
+      },
+      "eu-west-1": {
+        "identifyText": "eu-west-1"
+      },
+      "eu-west-2": {
+        "identifyText": "eu-west-2"
+      },
+      "eu-west-3": {
+        "identifyText": "eu-west-1"
+      },
+      "eu-central-1": {
+        "identifyText": "eu-central-1"
+      },
+      "eu-north-1": {
+        "identifyText": "eu-central-1"
+      },
+      "ap-northeast-1": {
+        "identifyText": "us-east-1"
+      },
+      "ap-northeast-2": {
+        "identifyText": "ap-northeast-2"
+      },
+      "ap-southeast-1": {
+        "identifyText": "ap-southeast-1"
+      },
+      "ap-southeast-2": {
+        "identifyText": "ap-southeast-2"
+      },
+      "ap-south-1": {
+        "identifyText": "ap-south-1"
+      },
+      "me-south-1": {
+        "identifyText": "ap-south-1"
+      },
+      "sa-east-1": {
+        "identifyText": "us-east-1"
+      }
+    }
+  }
+}
